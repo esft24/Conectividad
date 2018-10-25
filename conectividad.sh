@@ -7,7 +7,7 @@ dns=`nmcli dev show | awk '/IP4\.DNS/ {print $2}'`
 errors=0 
 
 subject="Conectividad a Dominio $2"
-localMailAdress="$USER"
+localMailAddress="$USER"
 mailAddress="12-11555@usb.ve"
 
 # Probar Router
@@ -30,29 +30,34 @@ function dns
 {
     for i in $dns
     do 
-        (ping -q -c 4 $dns > dev/null && return 0)
+        ping -q -c 4 $i > /dev/null
+        if [ $? -eq 0 ]
+        then
+            return 0
+        fi
     done
 
+    echo "No se pueden alcanzar los servidores DNS"
     return 1
 }
 
 # Probar conectividad a dominio
 function domain_connectivity()
 {
-    (ping -q -c 4 $1 > /dev/null && return 0) || (echo "El dominio " $1 " no puede ser alcanzado" && return 1)
+    (ping -q -c 4 "$1" > /dev/null && return 0) || (echo "El dominio " $1 " no puede ser alcanzado" && return 1)
 }
 
 # Probar estado del dominio
 function domain_state()
 {
     http=`curl -s --max-time 4 -I $1 | awk 'NR == 1'`
-    http2=`$http | awk '{ print $2 }'`
+    http2=`echo $http | awk '{ print $2 }'`
 
     if [ "$http" != "" ]
     then
+        
         if [ "${http2:0:1}" != "2" ] && [ "${http2:0:1}" != "3" ]
         then
-
             echo "Hay algo mal con la conexión HTTP al dominio $2 $http"
             sendmutt "Hay algo mal con la conexión HTTP al dominio $2 $http"
             return 1
@@ -60,13 +65,13 @@ function domain_state()
             return 0
         fi
     else
-        return "2"
+        return 2
     fi
 }
 
 function sendlocal()
 {
-    (((echo $subject ; echo $1) | /usr/sbin/sendmail - i $localMailAdress) && echo "Correo enviado a usuario local") || echo "Correo no enviado"
+    notify-send "$subject" "$1" && echo "Notificación mostrada en pantalla" || echo "Notificación no mostrada"
 }
 
 function sendmutt()
@@ -85,42 +90,37 @@ then
         errors=$?
         if [ $errors -eq 1 ]
         then
+            
             domain_state "$domainName"
             errors=$?
 
-            if [ $errors = "2" ]
+            if [ $errors -eq 2 ]
             then
-                isp
+                router
                 errors=$?
 
-                if [ $errors -eq 1 ]
+                if [ $errors -eq 0 ]
                 then
                     dns
                     errors=$?
                     if [ $errors -eq 1 ]
                     then
-                        router
+                        isp
                         errors=$?
                         if [ $errors -eq 1 ]
                         then
-
-                            sendmutt "No se pueden alcanzar el Gateway o hay problemas con la conexión física."
-
+                            sendmutt "No se puede alcanzar el proveedor de servicios."
                             break
                         fi
-
-                        sendmutt "No se pueden alcanzar los servidores DNS,"
-
+                        sendmutt "No se pueden alcanzar los servidores DNS."
                         break
                     fi
-                    
-                    sendmutt "No se puede alcanzar el proveedor de servicios."
 
+                    sendmutt "No existe el dominio $domainName"
                     break
                 fi
 
-                sendmutt "El dominio no se encuentra."
-                
+                sendmutt "No se pueden alcanzar el Gateway o hay problemas con la conexión física."
                 break
             fi
 
@@ -130,8 +130,9 @@ then
             fi
         fi
 
-        sleep 60
-        # break
+        # sleep 60
+        echo "Todo Bien"
+        break
         
     done
     exit 0
