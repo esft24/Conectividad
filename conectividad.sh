@@ -130,9 +130,9 @@ then
             fi
         fi
 
-        # sleep 60
-        echo "Todo Bien"
-        break
+        sleep 60
+        # echo "Todo Bien"
+        # break
         
     done
     exit 0
