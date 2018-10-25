@@ -4,11 +4,10 @@
 isp=`nmcli dev show | awk '/IP4.DOMAIN/ {print $2}'`
 gw=`ip r | awk '/default/ {print $3}'`
 dns=`nmcli dev show | awk '/IP4\.DNS/ {print $2}'`
-errors=0 
+errors=0
 
 subject="Conectividad a Dominio $2"
-localMailAddress="$USER"
-mailAddress="12-11555@usb.ve"
+mailAddress="$3"
 
 # Probar Router
 function router
@@ -44,7 +43,7 @@ function dns
 # Probar conectividad a dominio
 function domain_connectivity()
 {
-    (ping -q -c 4 "$1" > /dev/null && return 0) || (echo "El dominio " $1 " no puede ser alcanzado" && return 1)
+    (ping -q -c 4 "$1" > /dev/null && return 0) || (echo "El dominio" $1 "no puede ser alcanzado" && return 1)
 }
 
 # Probar estado del dominio
@@ -71,12 +70,13 @@ function domain_state()
 
 function sendlocal()
 {
-    notify-send "$subject" "$1" && echo "Notificación mostrada en pantalla" || echo "Notificación no mostrada"
+    notify-send "$subject" "$1" > /dev/null && echo "Notificación mostrada en pantalla" || echo "Notificación no mostrada"
 }
 
 function sendmutt()
 {
-    echo "$1" | mutt -s "$subject" -e "my_hdr From:$mailAddress" -- "$mailAddress" && echo "Correo enviado" || sendlocal "$1"
+    echo "$1" | mutt -s "$subject" -e "my_hdr From:$mailAddress" -- "$mailAddress" > /dev/null && echo "Correo enviado" || sendlocal "$1"
+    date
 }
 
 if [ "$1" = "DAEMON" ]
@@ -140,4 +140,4 @@ fi
 
 export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin:/usr/local/bin
 umask 022
-nohup setsid $0 DAEMON $* 2>/var/log/conectividad.err >/var/log/conectividad.log &
+nohup setsid $0 DAEMON $* 2>~/conectividad.err >~/conectividad.log &
