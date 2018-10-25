@@ -130,8 +130,8 @@ then
             fi
         fi
 
-        # sleep 60
-        break
+        sleep 60
+        # break
         
     done
     exit 0
