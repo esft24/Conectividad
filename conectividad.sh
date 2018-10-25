@@ -140,4 +140,4 @@ fi
 
 export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin:/usr/local/bin
 umask 022
-nohup setsid $0 DAEMON $* 2>~/Escritorio/TrimestreSeptDic2018/RedesDeComputadoras/connect.err >~/Escritorio/TrimestreSeptDic2018/RedesDeComputadoras/connect.log &
+nohup setsid $0 DAEMON $* 2>/var/log/conectividad.err >/var/log/conectividad.log &
