@@ -1,0 +1,46 @@
+1. Instalar Network Manager
+
+$ sudo apt-get install nmcli
+
+2. Instalar mutt
+
+$ sudo apt-get install mutt
+
+3. Configurar mutt para enviar correos (gmail como ejemplo).
+
+3.1 Crear archivo de configuracion de mutt
+
+$ touch ~/.mutt/muttrc
+$ vim ~/.mutt/muttrc
+
+3.2 Agregar configuracion
+
+set ssl_starttls=yes
+set ssl_force_tls=yes
+
+set imap_user = 'cambiar_este_usuario@gmail.com'
+set imap_pass = 'cambiar_esta_clave'
+
+set from='cambiar_este_usuario@gmail.com'
+set realname='tu nombre'
+
+set folder = imaps://imap.gmail.com/
+set spoolfile = imaps://imap.gmail.com/INBOX
+set postponed="imaps://imap.gmail.com/[Gmail]/Drafts"
+
+set header_cache = "~/.mutt/cache/headers"
+set message_cachedir = "~/.mutt/cache/bodies"
+set certificate_file = "~/.mutt/certificates"
+
+set smtp_url = 'smtp://cambiar_este_usuario@gmail.com:cambiar_esta_clave@smtp.gmail.com:465/'
+
+set move = no
+set imap_keepalive = 900
+
+4. Dar permisos de ejecucion al script
+
+$ chmod +x ./conectividad.sh
+
+5. Correr el script
+
+$ ./conectividad.sh dominio correo_a_notificar

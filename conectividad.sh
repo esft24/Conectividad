@@ -16,6 +16,8 @@ function router
     then
         (ping -q -c 4 $gw > /dev/null && return 0) || (echo "Problemas con el Gateway" && return 1)
     fi
+
+    return 0
 }
 
 # Probar ISP
